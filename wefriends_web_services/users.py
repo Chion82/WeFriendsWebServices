@@ -17,7 +17,7 @@ def createUser(request):
 	phone = urlencode(request.POST.get("phone"))
 	email = urlencode(request.POST.get("email"))
 	password = urlencode(request.POST.get("password"))
-	gender = int(urlencode(request.POST.get("gender")))
+	gender = urlencode(request.POST.get("gender"))
 	wefriendsId = urlencode(request.POST.get("wefriendsid"))
 	nickname = urlencode(request.POST.get("nickname"))
 	intro = urlencode(request.POST.get("intro"))
@@ -46,7 +46,7 @@ def createUser(request):
 	DBUsers.phone = phone
 	DBUsers.email = email
 	DBUsers.password = str_md5(password)
-	DBUsers.gender = gender
+	DBUsers.gender = int(gender)
 	DBUsers.wefriendsid = wefriendsId
 	DBUsers.nickname = nickname
 	DBUsers.intro = intro
