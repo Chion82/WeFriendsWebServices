@@ -26,7 +26,7 @@ def createUser(request):
 	collegeId = urlencode(request.POST.get("collegeid"))
 	avatar = "/static/avatars/default.png"
 
-	if ( (not validateParam(phone)) or (not validateParam(wefriendsId)) or (not validateParam(password)) or (not validateParam(nickname)) or (not validateParam(region)) or (not validateParam(collegeId)) or (not validateParam(gender)) or (gender!=0 and gender!=1)):
+	if ( (not validateParam(phone)) or (not validateParam(wefriendsId)) or (not validateParam(password)) or (not validateParam(nickname)) or (not validateParam(region)) or (not validateParam(collegeId)) or (not validateParam(gender)) or (gender!='0' and gender!='1')):
 		return HttpResponse('{"status": -1, "message": "Invalid input."}')
 
 	if (Users.objects(wefriendsid=wefriendsId).count() > 0):
