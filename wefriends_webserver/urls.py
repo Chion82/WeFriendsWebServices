@@ -14,6 +14,9 @@ urlpatterns = patterns('',
     url(r'^users/getuserinfobywefriendsid$','wefriends_web_services.views.view_getUserInfoByWefriendsId'),
     url(r'^users/updateuserinfo$','wefriends_web_services.views.view_updateUserInfo'),
     url(r'^users/updatewhatsup$','wefriends_web_services.views.view_updateWhatsup'),
+    url(r'^users/getwhatsup$','wefriends_web_services.views.view_getWhatsup'),
+    url(r'^users/getfriendlist','wefriends_web_services.views.view_getFriendList'),
+    url(r'^users/getwhatsupbywefriendsid','wefriends_web_services.views.view_getWhatsupByWefriendsId'),
 
 
     url(r'^files/upload$','wefriends_web_services.views.view_uploadFile'),

@@ -31,3 +31,11 @@ def view_updateUserInfo(request):
 def view_updateWhatsup(request):
 	return updateWhatsup(request)
 
+def view_getWhatsup(request):
+	return getWhatsup(request)
+
+def view_getFriendList(request):
+	return getFriendList(request)
+
+def view_getWhatsupByWefriendsId(request):
+	return getWhatsupByWefriendsId(request)

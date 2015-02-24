@@ -19,7 +19,6 @@ class Users(Document):
 class Friends(Document):
 	wefriendsid = StringField()
 	friends = ListField()
-	groups = ListField()
 
 class Tags(Document):
 	wefriendsid = StringField()

@@ -93,16 +93,19 @@ def login(request):
 	if (str_md5(password) != objUsers.first().password):
 		return HttpResponse('{"status": 403, "message": "Password incorrect."}')
 
-	token = generateAndSaveAccessToken(objUsers.first().wefriendsid)
-	userInfo = getUserInfo(objUsers.first().wefriendsid).to_json()
-	return HttpResponse('{"status": 200, "accesstoken": "%s", "message": "Successfully logged in.", "userinfo": %s}' % (token, userInfo))
+	wefriendsId = objUsers.first().wefriendsid
+	token = generateAndSaveAccessToken(wefriendsId)
+	userInfo = json.loads(Users.objects(wefriendsid=wefriendsId).only("gender","wefriendsid","nickname","intro","region","collegeid", "phone", "email", "avatar").first().to_json())
+	userInfo["whatsup"] = Whatsup.objects(wefriendsid=wefriendsId).first().whatsup
+	return HttpResponse('{"status": 200, "accesstoken": "%s", "message": "Successfully logged in.", "userinfo": %s}' % (token, json.dumps(userInfo)))
 
 def getUserInfoByToken(request):
 	if (not authenticateAccessToken(request.GET.get("accesstoken"))):
 		return HttpResponse('{"status": 403, "message": "Access token invalid."}')
 	wefriendsId = getWefriendsIdByToken(request.GET.get("accesstoken"))
-	userInfo = Users.objects(wefriendsid=wefriendsId).only("gender","wefriendsid","nickname","intro","region","collegeid", "phone", "email", "avatar").first().to_json()
-	return HttpResponse('{"status": 200, "message": "OK", "userinfo": %s}' % userInfo)
+	userInfo = json.loads(Users.objects(wefriendsid=wefriendsId).only("gender","wefriendsid","nickname","intro","region","collegeid", "phone", "email", "avatar").first().to_json())
+	userInfo["whatsup"] = Whatsup.objects(wefriendsid=wefriendsId).first().whatsup
+	return HttpResponse('{"status": 200, "message": "OK", "userinfo": %s}' % json.dumps(userInfo))
 
 def getUserInfoByWefriendsId(request):
 	if (not authenticateAccessToken(request.GET.get("accesstoken"))):
@@ -111,9 +114,9 @@ def getUserInfoByWefriendsId(request):
 	if (not validateParam(wefriendsId)):
 		return HttpResponse('{"status": -1, "message": "Wefriends ID not specified."}')
 	if (Users.objects(wefriendsid=wefriendsId).count() == 0):
-		return HttpResponse('{"status": 404, "message": "Wefriends ID doesn\'t exist."}')
-	userInfo = getUserInfo(wefriendsId).to_json()
-	return HttpResponse('{"status": 200, "message": "OK", "userinfo": %s}' % userInfo)
+		return HttpResponse('{"status": 404, "message": "Wefriends ID not found."}')
+	userInfo = getUserInfo(wefriendsId)
+	return HttpResponse('{"status": 200, "message": "OK", "userinfo": %s}' % json.dumps(userInfo))
 
 def updateUserInfo(request):
 	if (not authenticateAccessToken(request.POST.get("accesstoken"))):
@@ -143,6 +146,36 @@ def updateWhatsup(request):
 	Whatsup.objects(wefriendsid=wefriendsId).update(set__whatsup=whatsup)
 	return HttpResponse('{"status": 200, "message": "What\'s up successfully updated."}')
 
+def getWhatsup(request):
+	if (not authenticateAccessToken(request.GET.get("accesstoken"))):
+		return HttpResponse('{"status": 403, "message": "Access token invalid."}')
+	wefriendsId = getWefriendsIdByToken(request.GET.get("accesstoken"))
+	whatsup = Whatsup.objects(wefriendsid=wefriendsId).first().whatsup
+	return HttpResponse('{"status":200,"message":"OK","whatsup":"%s"}' % whatsup)
+
+def getFriendList(request):
+	if (not authenticateAccessToken(request.GET.get("accesstoken"))):
+		return HttpResponse('{"status": 403, "message": "Access token invalid."}')
+	wefriendsId = getWefriendsIdByToken(request.GET.get("accesstoken"))
+	friendListObj = Friends.objects(wefriendsid=wefriendsId).first().friends
+	friendList = []
+	for friend in friendListObj:
+		if (Users.objects(wefriendsid=friend["wefriendsid"]).count() != 0):
+			friendDetails = getUserInfo(friend["wefriendsid"])
+			friendDetails["friendgroup"] = friend["friendgroup"]
+			friendList.append(friendDetails)
+	return HttpResponse('{"status":200,"message":"OK","friendlist":%s}' % json.dumps(friendList))
+
+def getWhatsupByWefriendsId(request):
+	if (not authenticateAccessToken(request.GET.get("accesstoken"))):
+		return HttpResponse('{"status": 403, "message": "Access token invalid."}')
+	wefriendsId = urlencode(request.GET.get("wefriendsid"))
+	if (not validateParam(wefriendsId)):
+		return HttpResponse('{"status": -1, "message": "Invalid input."}')
+	if (Users.objects(wefriendsid=wefriendsId).count() == 0):
+		return HttpResponse('{"status": 404, "message": "Wefriends ID not found."}')
+	whatsup = Whatsup.objects(wefriendsid=wefriendsId).first().whatsup
+	return HttpResponse('{"status":200,"message":"OK","whatsup":"%s"}' % whatsup)
 
 ######################################################################
 ####################	Internal-call Methonds	######################
@@ -162,7 +195,9 @@ def generateAndSaveAccessToken(wefriendsId):
 	return token
 
 def getUserInfo(wefriendsId):
-	return Users.objects(wefriendsid=wefriendsId).only("gender","wefriendsid","nickname","intro","region","collegeid", "avatar").first()
+	userInfo = json.loads(Users.objects(wefriendsid=wefriendsId).only("gender","wefriendsid","nickname","intro","region","collegeid", "avatar").first().to_json())
+	userInfo["whatsup"] = Whatsup.objects(wefriendsid=wefriendsId).first().whatsup
+	return userInfo
 
 def getWefriendsIdByToken(token):
 	return AccessToken.objects(token=token).first().wefriendsid
@@ -173,6 +208,8 @@ def authenticateAccessToken(token):
 	if (AccessToken.objects(token=token).count() == 0):
 		return False
 	if (AccessToken.objects(token=token).first().expires < int(time.time())):
+		return False
+	if (Users.objects(wefriendsid=getWefriendsIdByToken(token)).count() == 0):
 		return False
 	return True
 
@@ -204,3 +241,4 @@ def updateUserInfoByDict(userInfo, wefriendsId):
 	if ("avatar" in userInfo):
 		db.update(set__avatar=urlencode(userInfo["avatar"]))
 	return OK
+
