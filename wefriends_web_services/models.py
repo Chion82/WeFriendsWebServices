@@ -28,12 +28,14 @@ class Whatsup(Document):
 	wefriendsid = StringField()
 	whatsup = StringField()
 
-class Message(Document):
+class Messages(Document):
 	sender = StringField()
-	receiver = StringField()
+	receivers = ListField()
 	message = StringField()
 	timestramp = LongField()
 	messagetype = StringField()
+	chatgroup = StringField()
+	ishandled = ListField()
 
 class Colleges(Document):
 	collegeid = StringField()

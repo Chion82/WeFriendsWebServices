@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from wefriends_web_services.users import *
 from django.views.decorators.csrf import csrf_exempt
 from wefriends_web_services.upload import *
+from wefriends_web_services.messages import *
 
 @csrf_exempt
 def view_createUser(request):
@@ -39,3 +40,10 @@ def view_getFriendList(request):
 
 def view_getWhatsupByWefriendsId(request):
 	return getWhatsupByWefriendsId(request)
+
+@csrf_exempt
+def view_sendInstantMessage(request):
+	return sendInstantMessage(request)
+
+def view_getNewMessages(request):
+	return getNewMessages(request)
