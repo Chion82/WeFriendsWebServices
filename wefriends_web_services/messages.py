@@ -25,7 +25,7 @@ def sendInstantMessage(request):
 	msgDb.sender = wefriendsId
 	receiverList = []
 	for receiver in receivers:
-		receiverList.append(receiver)
+		receiverList.append(urlencode(receiver))
 	msgDb.receivers = receiverList
 	msgDb.message = message
 	msgDb.timestramp = timeStramp
