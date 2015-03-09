@@ -48,7 +48,7 @@ def sendHeartBeatPackage(sock):
 		return True
 
 def dropConnection(sock,clientAddr):
-	print('Connection from ' + clientAddr + ' closed. Exiting thread.')
+	print('Connection from ' + clientAddr + ' closed. Client thread exiting.')
 	sock.close()	
 
 def main():
