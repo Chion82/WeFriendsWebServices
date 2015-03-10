@@ -43,6 +43,17 @@ def getNewMessages(request):
 	wefriendsIdList.append(wefriendsId)
 	msgDb = Messages.objects(receivers=wefriendsId,ishandled__nin=wefriendsIdList)
 	messageCount = msgDb.count()
-	response = HttpResponse('{"status": 200,"count": %d,"messages" : %s }' % (messageCount,msgDb.all().to_json()))
+	resultList = []
+	for msg in msgDb.all():
+		msgJSON = json.loads(msg.to_json())
+		userObj = Users.objects(wefriendsid=msg.sender)
+		if (userObj.count() > 0):
+			msgJSON['sendernickname'] = userObj.first().nickname
+			msgJSON['senderavatar'] = userObj.first().avatar
+		else:
+			msgJSON['sendernickname'] = '[User deleted]'
+			msgJSON['senderavatar'] = 'static/avatars/default.png'		
+		resultList.append(msgJSON)
+	response = HttpResponse('{"status": 200,"count": %d,"messages" : %s }' % (messageCount,json.dumps(resultList)))
 	msgDb.update(push__ishandled=wefriendsId)
 	return response

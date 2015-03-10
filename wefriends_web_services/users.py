@@ -24,7 +24,7 @@ def createUser(request):
 	region = urlencode(request.POST.get("region"))
 	registerTime = long(time.time())
 	collegeId = urlencode(request.POST.get("collegeid"))
-	avatar = "/static/avatars/default.png"
+	avatar = "static/avatars/default.png"
 
 	if ( (not validateParam(phone)) or (not validateParam(wefriendsId)) or (not validateParam(password)) or (not validateParam(nickname)) or (not validateParam(region)) or (not validateParam(collegeId)) or (not validateParam(gender)) or (gender!='0' and gender!='1')):
 		return HttpResponse('{"status": -1, "message": "Invalid input."}')
